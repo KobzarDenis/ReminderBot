@@ -17,5 +17,5 @@ gulp.task("build-src", function () {
         .pipe(tsProject())
         .js
         .pipe(sourcemaps.write('.', {includeContent: false, sourceRoot: './src'}))
-        .pipe(gulp.dest("dist"));
+        .pipe(gulp.dest("./dist"));
 });

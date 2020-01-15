@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "rm -rf ./dist && gulp",
-    "start": "node --max-old-space-size=2048 --inspect ./dist/index.js",
+    "start": "rm -rf ./dist && gulp && node --max-old-space-size=2048 --inspect ./dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
