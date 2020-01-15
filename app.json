@@ -1,0 +1,14 @@
+{
+  "name": "ReminderBot",
+  "description": "You'll never forget about task of yours!",
+  "addons": [
+    "mongolab",
+    {
+      "as": "MONGO_URL",
+      "plan": "sandbox",
+      "options": {
+        "name": "reminder-bot-mongo"
+      }
+    }
+  ]
+}
