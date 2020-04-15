@@ -2,7 +2,7 @@ import {IServer, IRoute} from "../net";
 
 export const Route = (route: IRoute) => {
     return (target: Function, key: string, descriptor: PropertyDescriptor) => {
-        if(!target.constructor["routs"]) {
+        if (!target.constructor["routs"]) {
             target.constructor["routs"] = new Map<string, Function>();
         }
         target.constructor["routs"].set(route, descriptor.value.bind(target));
@@ -11,6 +11,12 @@ export const Route = (route: IRoute) => {
 
 export const Register = (server) => {
     return (constructorFunction: Function) => {
-        server.prototype.routs = constructorFunction["routs"];
+
+        if(!server.prototype.routs) {
+            server.prototype.routs = constructorFunction["routs"];
+        } else {
+            const mapRouts = new Map<IRoute, Function>([...server.prototype.routs, ...constructorFunction["routs"]]);
+            server.prototype.routs = mapRouts;
+        }
     };
 }

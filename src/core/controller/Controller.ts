@@ -1,13 +1,8 @@
-import {IServer} from "../net";
+import {Logger} from "@core/logger";
 
 export abstract class Controller {
     protected constructor() {
-        console.log('-- BASE constructor invoked --');
-        this.register();
-    }
-
-    private register() {
-        console.log('-- BASE REGISTER invoked --');
+        Logger.getInstance().info('-- BASE constructor invoked --');
     }
 }
 

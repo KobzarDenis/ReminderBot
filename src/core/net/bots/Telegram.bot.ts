@@ -1,197 +1,176 @@
 import * as TelegramAPI from "node-telegram-bot-api";
-import {IncomingMessage, Button, BotName, Bot} from "./Bot";
-// import appconfig from "@config"; // ToDo: IMPLEMENT!
-import { EventEmitter } from "events";
-import {Logger} from "../../logger/Logger";
+import {IncomingMessage, Button, Bot} from "./Bot";
+import {Logger} from "@core/logger/Logger";
 
 export class TelegramBot extends Bot {
 
-  public readonly source: BotName;
+    private bot: TelegramAPI;
+    public static _instance: TelegramBot;
 
-  private bot: TelegramAPI;
-  public static _instance: TelegramBot;
+    constructor(config) {
+        super();
+        this.bot = new TelegramAPI(config.token, {polling: true});
+        this.init();
+    }
 
-  constructor(token: string) {
-    super();
-    // this.bot = new TelegramAPI(token, { polling: true });
-    // this.source = BotName.Telegram;
-  }
-
-  // ToDO: CHECK OUT THIS
-  public async test(msg): Promise<any> {
-    const testLink = "https://www.altexsoft.com/blog/business/functional-and-non-functional-requirements-specification-and-types/";
-    const testHtml = `<a href="${testLink}">NFR.You SHOULD READ.</a>`;
-    const testMarkdown = "```" +
-        `
+    // ToDO: CHECK OUT THIS
+    public async test(msg): Promise<any> {
+        const testLink = "https://www.altexsoft.com/blog/business/functional-and-non-functional-requirements-specification-and-types/";
+        const testHtml = `<a href="${testLink}">NFR.You SHOULD READ.</a>`;
+        const testMarkdown = "```" +
+            `
             await this.bot.sendMessage(msg.chat.id, testHtml, {parse_mode: "HTML"});
             await this.bot.sendMessage(msg.chat.id, testHtml2, {parse_mode: "MarkdownV2"});
             await this.bot.deleteMessage(msg.chat.id, msg.message_id);
             `
-        + "```";
+            + "```";
 
-    await this.bot.sendMessage(msg.chat.id, testHtml, {parse_mode: "HTML", disable_web_page_preview: true});
-    // await this.bot.sendMessage(msg.chat.id, testMarkdown, {parse_mode: "MarkdownV2"});
-    await this.bot.deleteMessage(msg.chat.id, msg.message_id);
-  }
-
-  public static getInstance(token?: string): TelegramBot {
-    if (!TelegramBot._instance) {
-      if (!token) {
-        throw new Error(`Missing params`);
-      }
-
-      TelegramBot._instance = new TelegramBot(token);
+        await this.bot.sendMessage(msg.chat.id, testHtml, {parse_mode: "HTML", disable_web_page_preview: true});
+        // await this.bot.sendMessage(msg.chat.id, testMarkdown, {parse_mode: "MarkdownV2"});
+        await this.bot.deleteMessage(msg.chat.id, msg.message_id);
     }
 
-    return TelegramBot._instance;
-  }
+    public static getInstance(token?: string): TelegramBot {
+        if (!TelegramBot._instance) {
+            if (!token) {
+                throw new Error(`Missing params`);
+            }
 
+            TelegramBot._instance = new TelegramBot(token);
+        }
 
-  public init() {
-    this.bot.on('message', async (msg) => {
-      const parsedMessage: IncomingMessage = this.parseMessage(msg);
-      await super.onMessage(parsedMessage);
-    });
-    this.bot.on('callback_query', async (msg) => {
-      const parsedMessage: IncomingMessage = this.parseMessage(msg);
-      await super.onCallBack(parsedMessage);
-    });
-    // this.on(Command.Subscribe, this.subscribe.bind(this));
-    // this.on(Command.Start, this.start.bind(this));
-    // this.on(Command.Help, this.help.bind(this));
-    // this.on(Command.RemindMe, this.remindMe.bind(this));
-    // this.on(Command.Setup, this.setup.bind(this));
-  }
-
-  public buttonsBuilder(template: Button | Button[]) {
-    if (template) {
-      const options = {
-        reply_markup: "{}",
-        resize_keyboard: true,
-        one_time_keyboard: true
-      };
-
-      const inline_keyboard: any[] = [];
-
-      if (Array.isArray(template)) {
-        template.forEach(b => {
-          inline_keyboard.push([{
-            text: b.text,
-            callback_data: b.value
-          }]);
-        })
-      } else {
-        inline_keyboard.push([{
-          text: template.text,
-          callback_data: template.value
-        }]);
-      }
-
-      options.reply_markup = JSON.stringify({ inline_keyboard, hide_keyboard: true });
-
-      return options;
-    }
-  }
-
-  public async sendMessage(chatId: string | number, message: string, buttons?: Button | Button[]): Promise<number> {
-    let msgId: number;
-
-    if (buttons) {
-      const options = this.buttonsBuilder(buttons);
-      msgId = await this.bot.sendMessage(chatId, message, options);
-    } else {
-      msgId = await this.bot.sendMessage(chatId, message);
+        return TelegramBot._instance;
     }
 
-    return msgId;
-  }
 
-  protected parseMessage(msg: any): IncomingMessage {
-    const original = msg.text ? msg.text.trim() : msg.data.trim();
-    const parsed = original.split(':');
-    const commandAndId = parsed[0].split(' ');
+    public init() {
+        this.bot.on('message', async (msg) => await super.onAction(this.parseMessage(msg)));
+        this.bot.on('callback_query', super.onAction.bind(this));
+    }
 
-    const chat = msg.chat || msg.message.chat;
+    public buttonsBuilder(template: Button | Button[]) {
+        if (template) {
+            const options = {
+                reply_markup: "{}",
+                resize_keyboard: true,
+                one_time_keyboard: true
+            };
 
-    let message: IncomingMessage = {
-      original,
-      chat: {
-        id: chat.id,
-        source: this.source,
-        firstName: chat.first_name,
-        lastName: chat.last_name
-      },
-      command: commandAndId[0].trim(),
-      userId: commandAndId.length > 1 ? commandAndId[1].trim() : null,
-      payload: parsed[1] ? parsed[1].split('_').map(val => val.trim()) : null
-    };
+            const inline_keyboard: any[] = [];
 
-    return message;
-  }
+            if (Array.isArray(template)) {
+                template.forEach(b => {
+                    inline_keyboard.push([{
+                        text: b.text,
+                        callback_data: b.value
+                    }]);
+                })
+            } else {
+                inline_keyboard.push([{
+                    text: template.text,
+                    callback_data: template.value
+                }]);
+            }
 
-  public async typingOn(chatId: string): Promise<any> {
-    await this.bot.sendChatAction(chatId, 'typing');
-  }
+            options.reply_markup = JSON.stringify({inline_keyboard, hide_keyboard: true});
 
-  public async typingOff(chatId: string): Promise<any> {
-    //await this.bot.sendChatAction(chatId, 'typing');
-  }
+            return options;
+        }
+    }
 
-  public async subscribe(data: IncomingMessage) {
-    await this.bot.sendMessage(data.chat.id, `${data.chat.first_name}, Вы можете поднять дохуя бабла.`);
-  }
+    public async sendMessage(chatId: string | number, message: string, buttons?: Button | Button[]): Promise<number> {
+        let msgId: number;
 
-  public async start(data: IncomingMessage) {
-    const message = `Выберите язык: `;
-    const options = {
-      reply_markup: JSON.stringify({
-        inline_keyboard: [
-          [{ text: 'Русский 🇷🇺', callback_data: `${1}:ru_${data.userId || 0}` }],
-          [{ text: 'Українська 🇺🇦', callback_data: `${2}:ua_${data.userId || 0}` }],
-          [{ text: 'English 🇮🇴', callback_data: `${3}:en_${data.userId || 0}` }]
-        ]
-      })
-    };
+        if (buttons) {
+            const options = this.buttonsBuilder(buttons);
+            msgId = await this.bot.sendMessage(chatId, message, options);
+        } else {
+            msgId = await this.bot.sendMessage(chatId, message);
+        }
 
-    // Logger.info(`NEW USER WAS STARTED [${data.userId}]`);
+        return msgId;
+    }
 
-    this.bot.sendMessage(data.chat.id, message, options);
-  }
+    protected parseMessage(msg: any): IncomingMessage {
+        const original = msg.text ? msg.text.trim() : msg.data.trim();
+        const parsed = original.split(':');
+        const commandAndId = parsed[0].split(' ');
 
-  public async remindMe(data: IncomingMessage) {
-    const message = `Ok, ${data.chat.first_name}. I'm gonna remind you about next meting`;
+        const chat = msg.chat || msg.message.chat;
 
-    await this.bot.sendMessage(data.chat.id, message);
-  }
+        let message: IncomingMessage = {
+            id: msg.message_id || msg.message.message_id,
+            chat: {
+                id: chat.id,
+                firstName: chat.first_name,
+                lastName: chat.last_name
+            },
+            command: commandAndId[0].trim(),
+            userId: commandAndId.length > 1 ? commandAndId[1].trim() : null,
+            payload: parsed[1] ? parsed[1].split('_').map(val => val.trim()) : null,
+            original
+        };
 
-  public async help(data: IncomingMessage) {
-    const options = {
-      reply_markup: JSON.stringify({
-        inline_keyboard: [
-          [{ text: 'Как это работает ?', callback_data: 1 }],
-          [{ text: 'Что я могу с этим делать ?', callback_data: 2 }],
-        ]
-      })
-    };
+        return message;
+    }
 
-    this.bot.sendMessage(data.chat.id, 'Выберите Ваш вопрос:', options);
-  }
+    public async typingOn(chatId: string): Promise<any> {
+        await this.bot.sendChatAction(chatId, 'typing');
+    }
 
-  async setUpMenu(chatId) {
-    const buttons = {
-      reply_markup: JSON.stringify({
-        keyboard: [
-          [{
-            text: "Something 1"
-          }],
-          [{
-            text: "Something 2"
-          }]
-        ]
-      }),
-      resize_keyboard: true
-    };
+    public async typingOff(chatId: string): Promise<any> {
+        //await this.bot.sendChatAction(chatId, 'typing');
+    }
 
-    await this.bot.sendMessage(chatId, "Welcome to the Club! =)", buttons);
-  }
+    public async start(message: IncomingMessage) {
+        const testLink = "https://www.altexsoft.com/blog/business/functional-and-non-functional-requirements-specification-and-types/";
+        const testHtml = `<a href="${testLink}">NFR.You SHOULD READ.</a>`;
+
+        await this.bot.sendMessage(message.chat.id, testHtml, {parse_mode: "HTML", disable_web_page_preview: true});
+        await this.bot.deleteMessage(message.chat.id, message.id);
+
+        // Logger.info(`NEW USER WAS STARTED [${data.userId}]`);
+
+        const options = {
+            reply_markup: JSON.stringify({
+                keyboard: [
+                    [{text: 'KСоздать новость'}],
+                    [{text: 'KСписок за неделю'}]
+                ]
+            })
+        };
+
+        this.bot.sendMessage(message.chat.id, message, options);
+    }
+
+    public async help(data: IncomingMessage) {
+        const options = {
+            reply_markup: JSON.stringify({
+                inline_keyboard: [
+                    [{text: 'Как это работает ?', callback_data: 1}],
+                    [{text: 'Что я могу с этим делать ?', callback_data: 2}],
+                ]
+            })
+        };
+
+        this.bot.sendMessage(data.chat.id, 'Выберите Ваш вопрос:', options);
+    }
+
+    async setUpMenu(chatId) {
+        const buttons = {
+            reply_markup: JSON.stringify({
+                keyboard: [
+                    [{
+                        text: "Something 1"
+                    }],
+                    [{
+                        text: "Something 2"
+                    }]
+                ]
+            }),
+            resize_keyboard: true
+        };
+
+        await this.bot.sendMessage(chatId, "Welcome to the Club! =)", buttons);
+    }
 }

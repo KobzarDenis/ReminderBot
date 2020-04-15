@@ -1,96 +1,90 @@
-import { EventEmitter } from "events";
-import { Logger } from "../../logger/Logger";
+import {EventEmitter} from "events";
+import {Logger} from "@core/logger";
 import {IRoute, IServer} from "../IServer";
 
 
 export type IncomingMessage = {
-  command: string,
-  payload: any,
-  chatId?: string,
-  chat?: any,
-  userId: string,
-  original: string
+    id: number,
+    command: string,
+    payload: any,
+    chat: {
+        id: number,
+        firstName: string,
+        lastName: string
+    },
+    userId: string,
+    original: string
 };
 
 export enum BotName {
-  Telegram = 'telegram',
-  Facebook = 'facebook'
+    Telegram = 'telegram'
 }
 
 export type Button = {
-  text: string;
-  value: string;
+    text: string;
+    value: string;
 };
+
+export const enum CommandType {
+    COMMAND = "/",
+    CALLBACK = "_",
+    KEYBOARD = "K"
+}
 
 export abstract class Bot extends EventEmitter implements IServer {
 
-  public routs: Map<IRoute, Function>;
-  public static readonly SHORT_PAUSE_MS = 2 * 1000;
-  public static readonly MID_PAUSE_MS = 5 * 1000;
-  public static readonly LONG_PAUSE_MS = 15 * 1000;
-  public static readonly VIDEO_PAUSE = 5 * 60 * 1000;
+    public routs: Map<IRoute, Function>;
+    private COMMAND_DELIMITER_INDEX = 0;
 
-  public source: string;
-
-  public async setup(data: IncomingMessage) {
-    console.log("SETUP BOT");
-  }
-
-  public async handleRequest(chatId: string, message: IncomingMessage) {
-    // const userMeta = await StateHolder.getUserAndMeta(`${this.source}:${chatId}`);
-    // Logger.getInstance().info(`NEW EVENT [${message.chat.source}] { action: ${message.command}, chatId: ${message.chat.id}, name: ${userMeta.user.name}}`);
-
-    // await userMeta.user.handleAction(message, userMeta.additional);
-
-    console.log("HANDLE REQUEST BOT");
-  }
-
-  private async processText(chatId: string, message: IncomingMessage) {
-    // const userMeta = await StateHolder.getUserAndMeta(`${this.source}:${chatId}`);
-    // Logger.getInstance().info(`NEW TEXT [${message.chat.source}] { chatId: ${message.chat.id}, name: ${userMeta.user.name}, text: ${message.original}}`);
-
-    // await userMeta.user.processText(message, userMeta.additional);
-
-    console.log("PROCESS TEXT BOT");
-  }
-
-  protected checkCommand(command: string): boolean {
-    if(!this.eventNames().find((n => n === command))) {
-      return false;
+    public async setup(data: IncomingMessage) {
+        Logger.getInstance().info("SETUP BOT");
     }
-    return true;
-  }
 
-  protected async onMessage(message: IncomingMessage) {
-    // Logger.getInstance().info(`[${message.chat.source}] Bot new message [chatId: ${message.chat.id}; name: ${message.chat.firstName} ${message.chat.lastName}]`);
-    // Logger.getInstance().info(`[${message.chat.source}] Bot new message [command: ${message.command}; payload: ${JSON.stringify(message.payload)}]`);
-
-    if(this.checkCommand(message.command)) {
-      this.emit(message.command, message);
-    } else {
-      this.processText(message.chat.id, message);
+    public async handleRequest(message: IncomingMessage) {
+        Logger.getInstance().info("HANDLE REQUEST BOT");
+        Logger.getInstance().info(`NEW EVENT [${message.chat.id}] { action: ${message.command}, chatId: ${message.chat.id}, name: ${message.chat.firstName}}`);
     }
-  }
 
-  protected async onCallBack(message: IncomingMessage) {
-    if (message.command == "") {
-      await this.setup(message);
-    } else {
-      await this.handleRequest(message.chat.id, message);
+    private async processText(message: IncomingMessage) {
+        Logger.getInstance().info(`NEW TEXT [${message.chat.id}] { chatId: ${message.chat.id}, name: ${message.chat.firstName}, text: ${message.original}}`);
+        Logger.getInstance().info("PROCESS TEXT BOT");
     }
-  }
 
-  protected abstract parseMessage(msg: any): IncomingMessage;
+    protected async onAction(message: IncomingMessage) {
+        const messageString = JSON.stringify(message);
+        switch (message.command[this.COMMAND_DELIMITER_INDEX]) {
+            case CommandType.CALLBACK:
+                Logger.getInstance().info(`INCOMING CALLBACK: ${messageString}`);
+                this.handleRequest(message);
+                break;
+            case CommandType.COMMAND:
+                Logger.getInstance().info(`INCOMING COMMAND: ${messageString}`);
+                this.handleRequest(message);
+                break;
+            case CommandType.KEYBOARD:
+                Logger.getInstance().info(`INCOMING KEYBOARD: ${messageString}`);
+                this.handleRequest(message);
+                break;
+            default:
+                Logger.getInstance().info(`INCOMING PLAIN MESSAGE: ${messageString}`);
+                this.handleRequest(message);
+                this.processText(message);
+                break;
+        }
+    }
 
-  public abstract async typingOn(chatId: string);
-  public abstract async typingOff(chatId: string);
+    protected abstract parseMessage(msg: any): IncomingMessage;
 
-  protected abstract buttonsBuilder(template: Button | Button[]);
+    public abstract async typingOn(chatId: string);
 
-  public abstract async sendMessage(chatId: string | number, message: string, buttons?: Button | Button[]): Promise<number>;
+    public abstract async typingOff(chatId: string);
 
-  public register(route: string, handler: Function) {
-    console.log(`BOT REGISTERED HANDLER - route: [${route}]`);
-  };
+    protected abstract buttonsBuilder(template: Button | Button[]);
+
+    public abstract async sendMessage(chatId: string | number, message: string, buttons?: Button | Button[]): Promise<number>;
+
+    public register(route: string, handler: Function) {
+        Logger.getInstance().info(`BOT REGISTERED HANDLER - route: [${route}]`);
+    };
 
 }

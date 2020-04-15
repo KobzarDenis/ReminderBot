@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/KobzarDenis/ReminderBot#readme",
   "dependencies": {
+    "tsconfig-paths": "^3.1.1",
     "ajv": "^6.2.0",
     "bluebird": "^3.5.5",
     "body-parser": "^1.18.2",
@@ -39,7 +40,6 @@
     "reflect-metadata": "^0.1.12",
     "sequelize": "^5.21.6",
     "source-map-support": "^0.5.3",
-    "tsconfig-paths": "^3.1.1",
     "uuid": "^3.3.2",
     "winston": "^2.4.0",
     "ws": "^4.1.0"
