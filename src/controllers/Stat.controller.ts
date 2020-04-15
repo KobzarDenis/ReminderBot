@@ -14,7 +14,7 @@ export class StatController extends Controller {
     }
 
     // @ts-ignore
-    @Route({method: "GET", route: Routs.GET_WEEK_STAT})
+    @Route({method: "GET", path: Routs.GET_WEEK_STAT})
     // @ts-ignore
     public async getWeekStat(): Promise<string> {
         console.log("INVOKED: getWeekStat");

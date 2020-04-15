@@ -152,7 +152,7 @@ export class ExpressServer implements IServer {
 
     public register() {
         for(const route of this.routs.keys()) {
-            console.log(`EXPRESS REGISTERED HANDLER - method: [${route.method}], route: [${route.route}]`);
+            console.log(`EXPRESS REGISTERED HANDLER - method: [${route.method}], route: [${route.path}]`);
             const handler = this.routs.get(route);
             if(handler) {
                 handler();

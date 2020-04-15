@@ -1,5 +1,5 @@
 export interface IRoute {
-    route: string;
+    path: string;
     method?: string;
 }
 

@@ -14,7 +14,7 @@ export class NoteController extends Controller {
     }
 
     // @ts-ignore
-    @Route({route: Routs.CREATE_NOTE})
+    @Route({path: Routs.CREATE_NOTE})
     // @ts-ignore
     public async createNote(): Promise<string> {
         console.log("INVOKED: createNote");
