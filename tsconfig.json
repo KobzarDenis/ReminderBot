@@ -27,8 +27,7 @@
         "./dist/core/*"
       ],
       "@config": [
-        "./src/appconfig",
-        "./dist/appconfig"
+        "./config"
       ]
     },
     "typeRoots": [
