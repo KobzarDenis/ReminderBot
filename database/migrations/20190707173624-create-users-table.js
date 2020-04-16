@@ -9,37 +9,24 @@ module.exports = {
                 autoIncrement: true
             },
             email: {
-                type: Sequelize.STRING,
+                type: Sequelize.TEXT(100),
                 allowNull: true,
                 unique: true
-            },
-            phoneNumber: {
-                type: Sequelize.STRING,
-                allowNull: true,
-                unique: true
-            },
-            botSource: {
-                type: Sequelize.ENUM("telegram", "facebook", "viber", "watsapp"),
-                allowNull: true
             },
             botId: {
                 type: Sequelize.STRING,
                 allowNull: true
             },
-            lang: {
-                type: Sequelize.ENUM("ua", "ru", "en"),
-                allowNull: true,
-            },
             password: {
                 allowNull: true,
                 type: Sequelize.TEXT
             },
-            firstName: {
+            salt: {
                 allowNull: true,
                 type: Sequelize.STRING
             },
-            lastName: {
-                allowNull: true,
+            name: {
+                allowNull: false,
                 type: Sequelize.STRING
             },
             uuid: {

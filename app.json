@@ -1,13 +1,13 @@
 {
   "name": "ReminderBot",
-  "description": "You'll never forget about task of yours!",
+  "description": "You'll forget nothing!",
   "addons": [
-    "mongolab",
+    "heroku-postgresql",
     {
-      "as": "MONGO_URL",
-      "plan": "sandbox",
+      "as": "DATABASE_URL",
+      "plan": "hobby-basic",
       "options": {
-        "name": "reminder-bot-mongo"
+        "name": "reminder-bot-pg"
       }
     }
   ]

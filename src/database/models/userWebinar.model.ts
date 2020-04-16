@@ -6,7 +6,7 @@ import {
     Table,
     BelongsTo
 } from "sequelize-typescript";
-import { ClientModel } from "./Client.model";
+import { ClientModel } from "./User.model";
 import {MeetingRequestModel} from "@core/models/meetingRequest.model";
 import {WebinarModel} from "@core/models/webinar.model";
 

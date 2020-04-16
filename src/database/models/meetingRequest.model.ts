@@ -7,7 +7,7 @@ import {
   Table,
   BelongsTo, HasMany
 } from "sequelize-typescript";
-import { ClientModel } from "./Client.model";
+import { ClientModel } from "./User.model";
 import {WebinarModel} from "@core/models/webinar.model";
 
 @DefaultScope({

@@ -6,7 +6,7 @@ import {
     Table,
     BelongsTo
 } from "sequelize-typescript";
-import { ClientModel } from "./Client.model";
+import { ClientModel } from "./User.model";
 
 @Table({
     timestamps: false,

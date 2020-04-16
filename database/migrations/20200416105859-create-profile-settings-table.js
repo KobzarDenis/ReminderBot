@@ -2,7 +2,7 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('userStates', {
+    return queryInterface.createTable('profileSettings', {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
@@ -19,19 +19,14 @@ module.exports = {
           key: "id"
         }
       },
-      state: {
-        type: Sequelize.TEXT,
+      hoursForLearningPerWeek: {
+        type: Sequelize.DataTypes.INTEGER,
         allowNull: false
-      },
-      mood: {
-        type: Sequelize.ENUM("unknown", "agree", "uncertainty", "block", "discard"),
-        allowNull: false,
-        defaultValue: "unknown"
       }
     }, {schema: 'clients'});
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('userStates');
+    return queryInterface.dropTable('profileSettings');
   }
 };

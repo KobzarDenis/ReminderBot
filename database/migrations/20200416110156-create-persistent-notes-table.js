@@ -2,7 +2,7 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('meetingRequests', {
+    return queryInterface.createTable('persistentNotes', {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
@@ -11,7 +11,6 @@ module.exports = {
       userId: {
         type: Sequelize.INTEGER,
         allowNull: false,
-
         references: {
           model: {
             tableName: "users",
@@ -20,32 +19,41 @@ module.exports = {
           key: "id"
         }
       },
-      isApplied: {
+      isCompleted: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: false
       },
-      isManual: {
-        type: Sequelize.BOOLEAN,
+      title: {
+        type: Sequelize.DataTypes.TEXT,
         allowNull: false,
-        defaultValue: false
       },
-      part: {
-        type: Sequelize.ENUM("noon", "evening"),
-        allowNull: true,
+      description: {
+        type: Sequelize.DataTypes.TEXT,
+        allowNull: false,
       },
-      type: {
-        type: Sequelize.ENUM("travel", "business", "both"),
-        allowNull: true,
+      tags: {
+        type: Sequelize.DataTypes.ARRAY(Sequelize.DataTypes.STRING),
+        allowNull: false,
+        defaultValue: []
+      },
+      estimatedTime: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 15
+      },
+      link: {
+        type: Sequelize.TEXT,
+        allowNull: false,
       },
       createdAt: {
         type: Sequelize.DATE,
         defaultValue: Sequelize.NOW
       }
-    }, {schema: 'clients'});
+    }, {schema: 'notes'});
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('meetingRequests');
+    return queryInterface.dropTable('persistentNotes');
   }
 };
