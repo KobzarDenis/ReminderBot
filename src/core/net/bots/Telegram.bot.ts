@@ -45,7 +45,8 @@ export class TelegramBot extends Bot {
 
     public init() {
         this.bot.on('message', async (msg) => await super.onAction(this.parseMessage(msg)));
-        this.bot.on('callback_query', super.onAction.bind(this));
+        this.bot.on('callback_query', async (msg) => await super.onAction(this.parseMessage(msg)));
+        super.register();
     }
 
     public buttonsBuilder(template: Button | Button[]) {
@@ -112,14 +113,6 @@ export class TelegramBot extends Bot {
         };
 
         return message;
-    }
-
-    public async typingOn(chatId: string): Promise<any> {
-        await this.bot.sendChatAction(chatId, 'typing');
-    }
-
-    public async typingOff(chatId: string): Promise<any> {
-        //await this.bot.sendChatAction(chatId, 'typing');
     }
 
     public async start(message: IncomingMessage) {

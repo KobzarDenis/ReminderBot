@@ -6,21 +6,29 @@ import {
     HasMany,
     Model,
     Table,
-    UpdatedAt, HasOne
+    UpdatedAt, HasOne, Scopes
 } from "sequelize-typescript";
 import * as sequelize from "sequelize";
-// import {ProfileSettingsModel} from "@core/models/ProfileSettings.model";
-// import {NotesModel} from "@core/models/Notes.model";
-// import {PersistentNotesModel} from "@core/models/PersistentNotes.model";
+import {NoteModel} from "./Notes.model";
+import {WeeklyNoteModel} from "./WeeklyNote.model";
+import {ProfileSettingsModel} from "./ProfileSettings.model";
 
 @DefaultScope({
-    attributes: ["id", "firstName", "lastName", "botSource", "botId", "uuid"]
+    attributes: ["id", "name", "botId", "uuid"]
+})
+@Scopes({
+    weeklyRead: {
+        attributes: ["id", "name", "botId", "uuid"],
+        include: [{
+            model: () => WeeklyNoteModel
+        }]
+    }
 })
 @Table({
     timestamps: true,
     paranoid: false,
     freezeTableName: true,
-    tableName: "user",
+    tableName: "users",
     schema: "clients"
 })
 export class UserModel extends Model<UserModel> {
@@ -69,13 +77,13 @@ export class UserModel extends Model<UserModel> {
     @UpdatedAt
     public updatedAt: Date;
 
-    // @HasMany(() => NotesModel)
-    // public notes: NotesModel[];
-    //
-    // @HasMany(() => PersistentNotesModel)
-    // public persistentNotes: PersistentNotesModel[];
-    //
-    // @HasOne(() => ProfileSettingsModel)
-    // public profileSettings: ProfileSettingsModel;
+    @HasOne(() => ProfileSettingsModel)
+    public profileSettings: ProfileSettingsModel;
+
+    @HasMany(() => NoteModel)
+    public notes: NoteModel[];
+
+    @HasMany(() => WeeklyNoteModel)
+    public weeklyNotes: WeeklyNoteModel[];
 
 }

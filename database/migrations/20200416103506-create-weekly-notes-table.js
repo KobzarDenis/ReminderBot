@@ -26,8 +26,7 @@ module.exports = {
             },
             notes: {
                 type: Sequelize.DataTypes.ARRAY(Sequelize.DataTypes.INTEGER),
-                allowNull: false,
-                defaultValue: []
+                allowNull: false
             },
             createdAt: {
                 type: Sequelize.DATE,

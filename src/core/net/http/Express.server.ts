@@ -1,9 +1,10 @@
 import * as  express from 'express';
 import * as  bodyParser from 'body-parser';
 import * as  cookieParser from 'cookie-parser';
-import {IRoute, IServer} from "./IServer";
+import {IRoute, IServer} from "../IServer";
 import {Server} from "https";
 import {Logger} from "@core/logger";
+import {METHODS} from "@core/net";
 
 export class ExpressServer implements IServer {
 
@@ -34,12 +35,12 @@ export class ExpressServer implements IServer {
     private wrapHandler(handler) {
         return async (req, res, next) => {
             try {
-                const params = req.method === "GET" ? req.params : req.body;
+                const params = req.method === "GET" ? req.query : req.body;
                 const data = await handler(params);
                 res.status(200);
                 res.json({data});
             } catch (error) {
-                res.status(error.code);
+                res.status(error.code || 500);
                 res.json({error: error.message});
             }
         };

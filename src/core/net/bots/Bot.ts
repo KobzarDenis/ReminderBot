@@ -36,13 +36,10 @@ export abstract class Bot extends EventEmitter implements IServer {
     public routs: Map<IRoute, Function>;
     private COMMAND_DELIMITER_INDEX = 0;
 
-    public async setup(data: IncomingMessage) {
-        Logger.getInstance().info("SETUP BOT");
-    }
-
     public async handleRequest(message: IncomingMessage) {
         Logger.getInstance().info("HANDLE REQUEST BOT");
         Logger.getInstance().info(`NEW EVENT [${message.chat.id}] { action: ${message.command}, chatId: ${message.chat.id}, name: ${message.chat.firstName}}`);
+        this.emit(message.command, message);
     }
 
     private async processText(message: IncomingMessage) {
@@ -75,16 +72,21 @@ export abstract class Bot extends EventEmitter implements IServer {
 
     protected abstract parseMessage(msg: any): IncomingMessage;
 
-    public abstract async typingOn(chatId: string);
-
-    public abstract async typingOff(chatId: string);
-
     protected abstract buttonsBuilder(template: Button | Button[]);
 
     public abstract async sendMessage(chatId: string | number, message: string, buttons?: Button | Button[]): Promise<number>;
 
-    public register(route: string, handler: Function) {
-        Logger.getInstance().info(`BOT REGISTERED HANDLER - route: [${route}]`);
-    };
+    public register() {
+        for (const route of this.routs.keys()) {
+            Logger.getInstance().info(`BOT REGISTERED HANDLER - route: [${route.path}]`);
+            const baseHandler = this.routs.get(route);
+            // @ts-ignore
+            this.on(route.path, async (msg: IncomingMessage) => {
+                // @ts-ignore
+                const result = await baseHandler(msg);
+                this.sendMessage(msg.chat.id, JSON.stringify(result));
+            });
+        }
+    }
 
 }

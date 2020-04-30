@@ -24,6 +24,11 @@ module.exports = {
                 allowNull: false,
                 defaultValue: false
             },
+            status: {
+                type: Sequelize.DataTypes.ENUM("new", "archived", "persistent"),
+                allowNull: false,
+                defaultValue: "new"
+            },
             title: {
                 type: Sequelize.DataTypes.TEXT,
                 allowNull: false,
